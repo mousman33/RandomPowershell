@@ -4,11 +4,12 @@
 .DESCRIPTION
     - With files from the Desktop Goose website, https://samperson.itch.io/desktop-goose
     - This script will install the Desktop Goose application and make it difficult to remove by creating a scheduled task that reinstalls it if deleted.
-    - Use with caution, not everyone will find it funny
 .NOTES
     Author: Mousman33
     Last Updated: 2026-04-01
-
+- add 'install' mode to install the script and scheduled task, and 'remove' mode to remove the scheduled task and delete the files.
+- make this the file that is run via its own scheduled task? Save goose zip somewhere. If goose zip are missing, run the remove option?
+- add different install methods for admin vs non-admin
 
 #>
 
