@@ -1,9 +1,14 @@
-<# Install Desktop Goose and make it hard to remove
+<# 
+.SYNOPSIS
+    Spawns a goose on the desktop. Install Desktop Goose and make it hard to remove
+.DESCRIPTION
+    - With files from the Desktop Goose website, https://samperson.itch.io/desktop-goose
+    - This script will install the Desktop Goose application and make it difficult to remove by creating a scheduled task that reinstalls it if deleted.
+    - Use with caution, not everyone will find it funny
+.NOTES
+    Author: Mousman33
+    Last Updated: 2026-04-01
 
-Notes:
-- With files from the Desktop Goose website, https://samperson.itch.io/desktop-goose
-- This script will install the Desktop Goose application and make it difficult to remove by creating a scheduled task that reinstalls it if deleted.
-- Use with caution, not everyone will find it funny
 
 #>
 
