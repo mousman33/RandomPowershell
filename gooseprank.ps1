@@ -38,7 +38,7 @@ if ($isAdmin) {
     $backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
     # options for scheduled task
     $principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
-    $taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
+    $taskpath = "\" # Place the task in a subfolder to hide it
 }
 
 function unpack-goose {
@@ -107,7 +107,7 @@ if ($install) {
     }
 
     #check that it was downloaded to the default location (part of install process)
-    $download = get-item "$env:USERPROFILE\Downloads\Desktop Goose*.zip"
+    $download = Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
     if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
         Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
         move-item -Path $download.FullName -Destination $backupPath -Force
@@ -171,7 +171,7 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
 } else {
     Write-Host "Creating scheduled task '$taskname' to run the gooseprank script at logon..." -ForegroundColor Green
     # Create the task
-    $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-File `"$backuppath\gooseprank.ps1`" -WindowStyle Hidden -NoProfile -executionpolicy bypass"
+    $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-WindowStyle Hidden -NoProfile -executionpolicy bypass -File `"$backuppath\gooseprank.ps1`""
     $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
     $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
     Register-ScheduledTask -TaskName $taskname -InputObject $task -Force -TaskPath $taskpath
