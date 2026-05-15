@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param (
     [switch]$Install,
-    [switch]$Remove,
+    [switch]$Remove
 )
 #-----------------------------------------------------------------------------------------------
 #region Variables and Functions
@@ -44,7 +44,7 @@ if ($isAdmin) {
 function unpack-goose {
     # Extract to the install path
     $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" | Select-Object -First 1
-    if $backupzip {
+    if ($backupzip) {
         Write-Host "Found backup zip at $($backupzip.FullName). Extracting..." -ForegroundColor Green
         Expand-Archive -Path $download.FullName -DestinationPath $installPath -Force
         Write-Host "Desktop Goose extracted to $installPath" -ForegroundColor Green
