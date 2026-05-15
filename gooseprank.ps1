@@ -97,9 +97,6 @@ function undo-honk {
 
 if ($install) {
     write-host "Installing Desktop Goose..." -ForegroundColor Green
-    #manually download desktop goose zip
-    write-host "First, we have to download the desktop goose zip file from the official website. Must be done manually. Please consider donating to the developer if you enjoy."
-    Start-Process "https://samperson.itch.io/desktop-goose" ; pause
 
     # Create backup directory if it doesn't exist
     if (-not (Test-Path $backupPath -ErrorAction SilentlyContinue)) {
@@ -117,11 +114,23 @@ if ($install) {
         unpack-goose # function to extract the zip to the install path
     } else {
         Write-Host "Desktop Goose zip file not found. Please download it from the official website and place it in your Downloads folder." -ForegroundColor Red
-        pause ; exit
+        #manually download desktop goose zip
+        write-host "First, we have to download the desktop goose zip file from the official website. Must be done manually. Please consider donating to the developer if you enjoy."
+        Start-Process "https://samperson.itch.io/desktop-goose" ; pause
+        if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
+            Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
+            move-item -Path $download.FullName -Destination $backupPath -Force
+            unpack-goose # function to extract the zip to the install path
+        } else {
+            Write-Host "Desktop Goose zip file not found in downloads. Exiting installation." -ForegroundColor Red
+            pause ; exit
+        }
     }
 
     #copy this script to the backup location so it can be called by the scheduled task even if the original is deleted
+    write-host "Copying this script to the backup location for scheduled task use..." -ForegroundColor Green
     $scriptPath = $MyInvocation.MyCommand.Path
+    Unblock-File -Path $scriptPath
     Copy-Item -Path $scriptPath -Destination "$backupPath\gooseprank.ps1" -Force
 }
 
