@@ -6,11 +6,12 @@
     - This script will install the Desktop Goose application and make it difficult to remove by creating a scheduled task that reinstalls it if deleted.
 .NOTES
     Author: Mousman33
-    Last Updated: 2026-04-01
+    
 - add another layer to add to startup foler as well? Can't have one lead to the other...
 - kinda designing this script to be run regularly to check everything is still in place and recreate if something is missing. Have not figured out how to call it though. 
     - have second script and make them call each other?
-
+    - separate scheduled tasks so they dont reference each other?
+    - have this script create a copy of itself in the backup location and call that copy in the scheduled task? That way if the original is deleted, the copy can still run and reinstall it.
 #>
 [CmdletBinding()]
 param (
