@@ -158,9 +158,9 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Write-Host "Creating scheduled task '$taskname' to run Desktop Goose at logon..." -ForegroundColor Green
     # Create the task
     $action = New-ScheduledTaskAction -Execute $honk.FullName
-    $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
-    $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
-    Register-ScheduledTask -TaskName $taskname -InputObject $task -Force -TaskPath $taskpath
+    $trigger = New-ScheduledTaskTrigger -Daily -At 9am -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
+    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+    Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Principal $principal -TaskPath $taskpath -Settings $settings -Force
     Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
 }
 
@@ -172,9 +172,9 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Write-Host "Creating scheduled task '$taskname' to run the gooseprank script at logon..." -ForegroundColor Green
     # Create the task
     $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-WindowStyle Hidden -NoProfile -executionpolicy bypass -File `"$backuppath\gooseprank.ps1`""
-    $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
-    $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
-    Register-ScheduledTask -TaskName $taskname -InputObject $task -Force -TaskPath $taskpath
+    $trigger = New-ScheduledTaskTrigger -Daily -At 9am -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
+    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+    Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Principal $principal -TaskPath $taskpath -Settings $settings -Force
     Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
 }
 
