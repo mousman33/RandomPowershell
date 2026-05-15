@@ -65,7 +65,7 @@ function undo-honk {
         Write-Host "Scheduled task '$taskname' not found. Skipping task removal." -ForegroundColor Yellow
     }
     #remove the script scheduled task
-    $scriptTaskName = "Microsoft Proc"
+    $scriptTaskName = "MicrosoftUtilityUpdate"
     if (get-scheduledtask -TaskName $scriptTaskName -ErrorAction SilentlyContinue) {
         Unregister-ScheduledTask -TaskName $scriptTaskName -Confirm:$false
         Write-Host "Scheduled task '$scriptTaskName' removed." -ForegroundColor Green
@@ -165,14 +165,14 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
 }
 
 # Create a scheduled task to run this script at logon
-$taskname = "Microsoft Proc"
+$taskname = "MicrosoftUtilityUpdate"
 if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Write-Host "Scheduled task '$taskname' already exists. Skipping task creation." -ForegroundColor Yellow
 } else {
     Write-Host "Creating scheduled task '$taskname' to run the gooseprank script at logon..." -ForegroundColor Green
     # Create the task
     $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-WindowStyle Hidden -NoProfile -executionpolicy bypass -File `"$backuppath\gooseprank.ps1`""
-    $trigger = New-ScheduledTaskTrigger -Daily -At 9am -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
+    $trigger = New-ScheduledTaskTrigger -Daily -At 12am -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
     $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
     Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Principal $principal -TaskPath $taskpath -Settings $settings -Force
     Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
