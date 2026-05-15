@@ -43,10 +43,10 @@ if ($isAdmin) {
 
 function unpack-goose {
     # Extract to the install path
-    $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" | Select-Object -First 1
+    $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($backupzip) {
         Write-Host "Found backup zip at $($backupzip.FullName). Extracting..." -ForegroundColor Green
-        Expand-Archive -Path $download.FullName -DestinationPath $installPath -Force
+        Expand-Archive -Path $backupzip.FullName -DestinationPath $installPath -Force
         Write-Host "Desktop Goose extracted to $installPath" -ForegroundColor Green
     } else {
         Write-Host "Backup zip not found in $backupPath. Removing Desktop Goose..." -ForegroundColor Red
@@ -73,14 +73,14 @@ function undo-honk {
         Write-Host "Scheduled task '$scriptTaskName' not found. Skipping task removal." -ForegroundColor Yellow
     }
     # Remove the installed files
-    if (Test-Path $installPath) {
+    if (Test-Path $installPath -ErrorAction SilentlyContinue) {
         Remove-Item -Path $installPath -Recurse -Force
         Write-Host "Installed files at $installPath removed." -ForegroundColor Green
     } else {
         Write-Host "Install path $installPath not found. Skipping file removal." -ForegroundColor Yellow
     }
-    # Optionally, remove the backup zip
-    $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" | Select-Object -First 1
+    # Remove the backup zip
+    $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($backupzip) {
         Remove-Item -Path $backupzip.FullName -Force
         Write-Host "Backup zip at $($backupzip.FullName) removed." -ForegroundColor Green
@@ -99,10 +99,10 @@ if ($install) {
     write-host "Installing Desktop Goose..." -ForegroundColor Green
     #manually download desktop goose zip
     write-host "First, we have to download the desktop goose zip file from the official website. Must be done manually. Please consider donating to the developer if you enjoy."
-    Start-Process "https://samperson.itch.io/desktop-goose"
+    Start-Process "https://samperson.itch.io/desktop-goose" ; pause
 
     # Create backup directory if it doesn't exist
-    if (-not (Test-Path $backupPath)) {
+    if (-not (Test-Path $backupPath -ErrorAction SilentlyContinue)) {
         New-Item -Path $backupPath -ItemType Directory -Force | Out-Null
         Write-Host "Backup directory created at $backupPath" -ForegroundColor Green
     } else {
@@ -111,7 +111,7 @@ if ($install) {
 
     #check that it was downloaded to the default location (part of install process)
     $download = get-item "$env:USERPROFILE\Downloads\Desktop Goose*.zip"
-    if (Test-Path $download.FullName) {
+    if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
         Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
         move-item -Path $download.FullName -Destination $backupPath -Force
         unpack-goose # function to extract the zip to the install path
@@ -126,13 +126,13 @@ if ($install) {
 }
 
 # get the path to the executable
-$honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse | Select-Object -First 1
+$honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($honk) {
     Write-Host "Desktop Goose executable found at $($honk.FullName)" -ForegroundColor Green
 } else {
     unpack-goose # if the executable isn't found, try to extract it from the backup zip
     # After unpacking, check again for the executable
-    $honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse | Select-Object -First 1
+    $honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($honk) {
         Write-Host "Desktop Goose executable found at $($honk.FullName) after unpacking." -ForegroundColor Green
     } else {
