@@ -26,20 +26,36 @@ if (Test-Path $download.FullName) {
     exit
 }
 
-#if running as admin, we can install to program files
+#Chekc for admin and set variables accordingly
 if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    $installPath = "$env:ProgramFiles\Desktop Goose"
-    write-host "Running as administrator, installing to $installPath"
+    write-host "Running as administrator"
+    $installPath = "$env:ProgramFiles\WinProcs"
+    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
 } else {
-    $installPath = "$env:USERPROFILE\AppData\Local\Desktop Goose"
-    write-host "Not running as administrator, installing to $installPath"
+    write-host "Running as user: $env:USERNAME"
+    $installPath = "$env:USERPROFILE\AppData\Local\WinProcs"
+    $principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
 }
 
+# Extract to the install path
+Expand-Archive -Path $download.FullName -DestinationPath $installPath -Force
+Write-Host "Desktop Goose extracted to $installPath" -ForegroundColor Green
 
+# get the path to the executable
+$honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse | Select-Object -First 1
+if ($honk) {
+    Write-Host "Desktop Goose executable found at $($honk.FullName)" -ForegroundColor Green
+} else {
+    Write-Host "Desktop Goose executable not found. Please check the installation." -ForegroundColor Red
+    exit
+}
 
-
-
-
+# Create a scheduled task to run the executable at logon
+$action = New-ScheduledTaskAction -Execute $honk.FullName
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+$task = New-ScheduledTask -Action $action -Trigger $trigger #-Principal $principal
+Register-ScheduledTask -TaskName "Desktop Goose" -InputObject $task -Force
+Write-Host "Scheduled task 'Desktop Goose' created to run at logon." -ForegroundColor Green
 
 
 
