@@ -7,6 +7,7 @@
 .NOTES
     Author: Mousman33
 
+.TODO
 - add another layer to add to startup foler as well? Can't have one lead to the other...
 - kinda designing this script to be run regularly to check everything is still in place and recreate if something is missing. Have not figured out how to call it though. 
     - have second script and make them call each other?
