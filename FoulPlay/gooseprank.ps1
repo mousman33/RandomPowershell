@@ -42,7 +42,7 @@ if ($isAdmin) {
     $taskpath = "\" # Place the task in a subfolder to hide it
 }
 
-function unpack-goose {
+function unpackgoose {
     # Extract to the install path
     $backupzip = Get-ChildItem -Path $backupPath -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($backupzip) {
@@ -112,7 +112,7 @@ if ($install) {
     if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
         Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
         move-item -Path $download.FullName -Destination $backupPath -Force
-        unpack-goose # function to extract the zip to the install path
+        unpackgoose # function to extract the zip to the install path
     } else {
         Write-Host "Desktop Goose zip file not found. Please download it from the official website and place it in your Downloads folder." -ForegroundColor Red
         #manually download desktop goose zip
@@ -121,7 +121,7 @@ if ($install) {
         if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
             Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
             move-item -Path $download.FullName -Destination $backupPath -Force
-            unpack-goose # function to extract the zip to the install path
+            unpackgoose # function to extract the zip to the install path
         } else {
             Write-Host "Desktop Goose zip file not found in downloads. Exiting installation." -ForegroundColor Red
             pause ; exit
@@ -140,7 +140,7 @@ $honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse -Er
 if ($honk) {
     Write-Host "Desktop Goose executable found at $($honk.FullName)" -ForegroundColor Green
 } else {
-    unpack-goose # if the executable isn't found, try to extract it from the backup zip
+    unpackgoose # if the executable isn't found, try to extract it from the backup zip
     # After unpacking, check again for the executable
     $honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($honk) {
