@@ -60,12 +60,24 @@ function undo-gosling {
 #-----------------------------------------------------------------------------------------------
 #region LOGIC
 
-
-# If shortcut to desktop goose doesn't exist, unpack it from the backup location
-$shortcutPath = Join-Path -Path $installPath -ChildPath "Goose.lnk"
-if (-not (Test-Path -Path $shortcutPath)) {
-    Write-Host "Desktop Goose shortcut not found in startup folder. Attempting to unpack from backup..." -ForegroundColor Yellow
+#if the package is not unzipped, unzip it
+if (-not (Test-Path -Path $unzippedpath)) {
+    Write-Host "Desktop Goose not found in unzipped location. Attempting to unpack..." -ForegroundColor Yellow
     unpackgoose
+} else {
+    Write-Host "Desktop Goose already exists in unzipped location." -ForegroundColor Green
+}
+
+
+# If shortcut to desktop goose doesn't exist, recreate it
+$shortcutPath = Join-Path -Path $installPath -ChildPath "WinPix.lnk"
+if (-not (Test-Path -Path $shortcutPath)) {
+    Write-Host "Desktop Goose shortcut not found in startup folder. Attempting to recreate..." -ForegroundColor Yellow
+    $honk = Get-ChildItem -Path $unzippedpath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+    $WshShell = New-Object -COMObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut("$installPath\WinPix.lnk")
+    $Shortcut.TargetPath = $honk.FullName
+    $Shortcut.Save()
 } else {
     Write-Host "Desktop Goose shortcut already exists in startup folder." -ForegroundColor Green
 }
