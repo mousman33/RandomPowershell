@@ -75,7 +75,7 @@ if (-not (Test-Path -Path $shortcutPath)) {
     Write-Host "Desktop Goose shortcut not found in startup folder. Attempting to recreate..." -ForegroundColor Yellow
     $honk = Get-ChildItem -Path $unzippedpath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
     $WshShell = New-Object -COMObject WScript.Shell
-    $Shortcut = $WshShell.CreateShortcut("$installPath\WinPix.lnk")
+    $Shortcut = $WshShell.CreateShortcut("$shortcutPath")
     $Shortcut.TargetPath = $honk.FullName
     $Shortcut.Save()
 } else {

