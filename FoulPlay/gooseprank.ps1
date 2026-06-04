@@ -16,7 +16,6 @@
 #>
 [CmdletBinding()]
 param (
-    [switch]$Install,
     [switch]$Remove
 )
 #-----------------------------------------------------------------------------------------------
@@ -150,45 +149,6 @@ function undo-honk {
 #region LOGIC
 
 
-if ($install) {
-    write-host "Installing Desktop Goose..." -ForegroundColor Green
-
-    # Create backup directory if it doesn't exist
-    if (-not (Test-Path $backupPath -ErrorAction SilentlyContinue)) {
-        New-Item -Path $backupPath -ItemType Directory -Force | Out-Null
-        Write-Host "Backup directory created at $backupPath" -ForegroundColor Green
-    } else {
-        Write-Host "Backup directory already exists at $backupPath" -ForegroundColor Yellow
-    }
-
-    #check that it was downloaded to the default location (part of install process)
-    $download = Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Filter "Desktop Goose*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
-        Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
-        move-item -Path $download.FullName -Destination $backupPath -Force
-        unpackgoose # function to extract the zip to the install path
-    } else {
-        Write-Host "Desktop Goose zip file not found. Please download it from the official website and place it in your Downloads folder." -ForegroundColor Red
-        #manually download desktop goose zip
-        write-host "First, we have to download the desktop goose zip file from the official website. Must be done manually. Please consider donating to the developer if you enjoy."
-        Start-Process "https://samperson.itch.io/desktop-goose" ; pause
-        if (Test-Path $download.FullName -ErrorAction SilentlyContinue) {
-            Write-Host "Desktop Goose zip file found at $($download.FullName)" -ForegroundColor Green
-            move-item -Path $download.FullName -Destination $backupPath -Force
-            unpackgoose # function to extract the zip to the install path
-        } else {
-            Write-Host "Desktop Goose zip file not found in downloads. Exiting installation." -ForegroundColor Red
-            pause ; exit
-        }
-    }
-
-    #copy this script to the backup location so it can be called by the scheduled task even if the original is deleted
-    write-host "Copying this script to the backup location for scheduled task use..." -ForegroundColor Green
-    $scriptPath = $MyInvocation.MyCommand.Path
-    Unblock-File -Path $scriptPath
-    Copy-Item -Path $scriptPath -Destination "$backupPath\gooseprank.ps1" -Force
-}
-
 # get the path to the executable
 $honk = Get-ChildItem -Path $installPath -Filter "GooseDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($honk) {
@@ -219,19 +179,6 @@ if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
     Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
 }
 
-# Create a scheduled task to run this script at logon
-$taskname = "MicrosoftUtilityUpdate"
-if (get-scheduledtask -TaskName $taskname -ErrorAction SilentlyContinue) {
-    Write-Host "Scheduled task '$taskname' already exists. Skipping task creation." -ForegroundColor Yellow
-} else {
-    Write-Host "Creating scheduled task '$taskname' to run the gooseprank script at logon..." -ForegroundColor Green
-    # Create the task
-    $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-WindowStyle Hidden -NoProfile -executionpolicy bypass -File `"$backuppath\gooseprank.ps1`""
-    $trigger = New-ScheduledTaskTrigger -Daily -At 12am -RandomDelay (New-TimeSpan -Minutes 60) # Add a random delay to make it less predictable
-    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
-    Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Principal $principal -TaskPath $taskpath -Settings $settings -Force
-    Write-Host "Scheduled task '$taskname' created to run at logon." -ForegroundColor Green
-}
 
 # install gosling script and shortcut
 callgosling
