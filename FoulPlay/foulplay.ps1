@@ -98,11 +98,12 @@ Please choose an action:
     switch ($choice) {
         "1" {
             Install-DesktopGoose
-            exit
+            write-host "Desktop Goose installation complete. Exiting." -ForegroundColor Green
+            pause ; exit
         }
         default {
             Write-Host "Invalid choice. Exiting." -ForegroundColor Red
-            exit
+            pause ; exit
         }
     }
 }
